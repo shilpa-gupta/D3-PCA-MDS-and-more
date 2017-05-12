@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MDS</title>
+    <script type="text/javascript" src="js/d3.v3.js"></script>
+</head>
+<style>
+    body {
+        font: 11px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .dot {
+        stroke: #000;
+    }
+
+    .tooltip {
+        position: absolute;
+        width: 200px;
+        height: 28px;
+        pointer-events: none;
+    }
+</style>
+<body>
+<script>
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var xValue = function(d) { return parseFloat(d.MDS1);}, // data -> value
+        xScale = d3.scale.linear().range([0, width]), // value -> display
+        xMap = function(d) { return xScale(xValue(d));}, // data -> display
+        xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+
+    var yValue = function(d) { return parseFloat(d.MDS2);}, // data -> value
+        yScale = d3.scale.linear().range([height, 0]), // value -> display
+        yMap = function(d) { return yScale(yValue(d));}, // data -> display
+        yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+    var csv_data;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv("data/strat_sample_mds_2D.csv",function (data) {
+
+        xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+        yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+
+        svg.append("g")
+            .attr("class","x axis")
+            .attr("transform","translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class","label")
+            .attr("x",width)
+            .attr("y",-6)
+            .style("text-anchor","end")
+            .text("MDS1");
+        svg.append("g")
+            .attr("class","y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class","label")
+            .attr("transform","rotate(-90)")
+            .attr("y",6)
+            .attr("dy",".71em")
+            .style("text-anchor","end")
+            .text("MDS2");
+
+        svg.selectAll(".dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("class","dot")
+            .attr("r",1)
+            .attr("cx",xMap)
+            .attr("cy",yMap)
+            .style("fill","black");
+
+    });
+</script>
+</body>
+</html>
